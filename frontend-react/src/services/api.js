@@ -1,46 +1,92 @@
 // src/services/api.js
-// Centralised API layer — swap base URL and endpoints once backend is ready
+// Centralized API layer — all calls to the FastAPI backend go through here.
+// Proxy: Vite forwards /api/* → http://localhost:8000/*
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const BASE = '/api';
 
-async function request(method, path, body = null) {
+// ── Generic fetch helper ─────────────────────────────────────────────
+async function request(method, path, body) {
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json' },
   };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(`${BASE_URL}${path}`, opts);
-  if (!res.ok) throw new Error(`API ${method} ${path} → ${res.status}`);
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(`${BASE}${path}`, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
   return res.json();
 }
 
-// ── Triage / Intake ────────────────────────────────────────────────
-export const submitIntake = (data) => request('POST', '/triage/intake', data);
-export const getTriageResult = (id) => request('GET', `/triage/${id}`);
+const get  = (path)        => request('GET',  path);
+const post = (path, body)  => request('POST', path, body);
 
-// ── Queue ──────────────────────────────────────────────────────────
-export const getQueue = () => request('GET', '/queue');
-export const getQueueItem = (id) => request('GET', `/queue/${id}`);
-export const updateQueueItem = (id, data) => request('PATCH', `/queue/${id}`, data);
+// ── Auth ─────────────────────────────────────────────────────────────
+// NOTE: backend currently has no auth endpoint — keeping as stub.
+// Replace body with { email, password, role } when backend adds /auth/login
+export const authAPI = {
+  login:  (email, password, role) => Promise.resolve({ email, role, name: role === 'admin' ? 'Dr. Admin' : 'Staff Member' }),
+  logout: ()                       => Promise.resolve(),
+};
 
-// ── Hospitals ──────────────────────────────────────────────────────
-export const getHospitals = () => request('GET', '/hospitals');
-export const getHospital = (id) => request('GET', `/hospitals/${id}`);
+// ── Triage / Analysis ─────────────────────────────────────────────────
+// POST /analyze/triage
+// Body matches PatientInput pydantic model
+export const analyzeAPI = {
+  /**
+   * Submit a patient for AI triage.
+   * Maps frontend form fields → backend PatientInput schema.
+   */
+  triage: (form) => post('/analyze/triage', {
+    patient_name: form.name          || 'Unknown',
+    age:          parseInt(form.age) || 0,
+    symptoms:     form.symptoms
+                    ? form.symptoms.split(/[,\n]+/).map(s => s.trim()).filter(Boolean)
+                    : [],
+    oxygen:       form.o2   ? parseInt(form.o2)   : null,
+    bp:           form.bp   || null,
+    heart_rate:   form.hr   ? parseInt(form.hr)   : null,
+    notes:        [form.notes, form.incidentType, form.location].filter(Boolean).join(' | ') || '',
+    location:     form.location || 'Ratnagiri, Maharashtra',
+    image_url:    null,
+  }),
 
-// ── Alerts ────────────────────────────────────────────────────────
-export const getAlerts = () => request('GET', '/alerts');
-export const acknowledgeAlert = (id) => request('PATCH', `/alerts/${id}/acknowledge`);
+  // POST /analyze/intake  (symptoms + vitals quick-check)
+  intake: (symptoms, vitals, notes) => post('/analyze/intake', { symptoms, vitals, notes }),
+};
 
-// ── Analytics ─────────────────────────────────────────────────────
-export const getMetrics = () => request('GET', '/analytics/metrics');
-export const getTrends = () => request('GET', '/analytics/trends');
-export const getSeverityDistribution = () => request('GET', '/analytics/severity');
-export const getHospitalUtilization = () => request('GET', '/analytics/utilization');
+// ── Patients ──────────────────────────────────────────────────────────
+export const patientsAPI = {
+  getAll:  ()           => get('/patients/'),
+  getOne:  (id)         => get(`/patients/${id}`),
+  save:    (data)       => post('/patients/', data),
+};
 
-// ── AI Insights ───────────────────────────────────────────────────
-export const getAIInsights = () => request('GET', '/ai/insights');
+// ── Alerts ────────────────────────────────────────────────────────────
+export const alertsAPI = {
+  getAll: () => get('/alerts/'),
+};
 
-// ── System Logs ───────────────────────────────────────────────────
-export const getLogs = (filter) => request('GET', `/logs${filter ? `?type=${filter}` : ''}`);
+// ── Analytics ─────────────────────────────────────────────────────────
+export const analyticsAPI = {
+  get: () => get('/analytics/'),
+};
 
-export default { submitIntake, getTriageResult, getQueue, getHospitals, getAlerts, getMetrics, getTrends, getAIInsights, getLogs };
+// ── Health check ──────────────────────────────────────────────────────
+export const healthAPI = {
+  ping: () => get('/'),
+};
+
+// ── WebSocket helper ──────────────────────────────────────────────────
+// Usage: const socket = createWebSocket(onMessage)
+export function createWebSocket(onMessage) {
+  const url = `ws://${window.location.hostname}:8000/ws`;
+  const ws  = new WebSocket(url);
+  ws.onmessage = (e) => {
+    try { onMessage(JSON.parse(e.data)); }
+    catch { onMessage(e.data); }
+  };
+  ws.onerror = (e) => console.warn('[PulseGrid WS] error', e);
+  return ws;
+}

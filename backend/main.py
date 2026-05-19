@@ -1,6 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from routes import analyze, patients, alerts, analytics
 from services.websocket_manager import websocket_endpoint
@@ -16,18 +17,29 @@ async def lifespan(app: FastAPI):
     try:
         from services.database_service import DatabaseService
         await DatabaseService.initialize()
-        logger.info("Database connected successfully")
+        logger.info("[OK] MongoDB connected successfully")
     except Exception as e:
-        logger.warning(f"Database not available: {e}")
-        logger.warning("Running without database – some endpoints will fail")
+        logger.warning(f"[WARN] MongoDB unavailable: {e}")
+        logger.warning("[INFO] Falling back to in-memory store — data persists for this session only")
+        from services.database_service import DatabaseService
+        DatabaseService.use_memory_fallback()
     yield
-    logger.info("Shutting down...")
+    logger.info("Shutting down PulseGrid AI...")
 
 app = FastAPI(
     title="PulseGrid AI",
     description="Multi-Agent Emergency Intelligence & Triage Coordination System",
     version="1.0.0",
     lifespan=lifespan
+)
+
+# Allow React frontend (dev + prod) to call the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000", "*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(analyze.router, prefix="/analyze", tags=["Analysis"])
