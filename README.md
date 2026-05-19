@@ -126,7 +126,7 @@ npm run dev
 
 ### Screenshots
 
-*Add screenshots here:*
+*Screenshots*
 
 ![Dashboard](../Hackathon/frontend-react/src/assets/ss1.jpeg)
 )
@@ -134,7 +134,7 @@ npm run dev
 
 ### Demo Video
 
-*Add your demo link here.*
+*[PulseGrid AI Demo](https://youtu.be/Se9TZW034fo)*
 
 ---
 
