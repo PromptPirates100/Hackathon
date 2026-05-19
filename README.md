@@ -126,14 +126,13 @@ npm run dev
 
 ### Screenshots
 
-*Add screenshots here:*
+![Dashboard](frontend-react/src/assets/ss1.jpeg)
 
-![Dashboard](./assets/dashboard.png)
-![Emergency Flow](./assets/workflow.png)
+![Emergency Flow](frontend-react/src/assets/ss2.jpeg)
 
 ### Demo Video
 
-*Add your demo link here.*
+*[PulseGrid AI Demo](https://youtu.be/Se9TZW034fo)*
 
 ---
 
@@ -144,13 +143,6 @@ npm run dev
 - Government healthcare connectivity
 - Predictive healthcare analytics
 - AI voice assistance for low-literacy users
-
----
-
-## 👥 Team
-
-- **team** – AI/ML & Backend
-- **Team Members** – Frontend, Cloud, APIs
 
 ---
 

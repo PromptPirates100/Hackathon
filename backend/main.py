@@ -17,12 +17,14 @@ async def lifespan(app: FastAPI):
     try:
         from services.database_service import DatabaseService
         await DatabaseService.initialize()
-        logger.info("Database connected successfully")
+        logger.info("[OK] MongoDB connected successfully")
     except Exception as e:
-        logger.warning(f"Database not available: {e}")
-        logger.warning("Running without database – some endpoints will fail")
+        logger.warning(f"[WARN] MongoDB unavailable: {e}")
+        logger.warning("[INFO] Falling back to in-memory store — data persists for this session only")
+        from services.database_service import DatabaseService
+        DatabaseService.use_memory_fallback()
     yield
-    logger.info("Shutting down...")
+    logger.info("Shutting down PulseGrid AI...")
 
 app = FastAPI(
     title="PulseGrid AI",

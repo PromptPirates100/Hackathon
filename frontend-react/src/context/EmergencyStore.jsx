@@ -1,4 +1,10 @@
 // src/context/EmergencyStore.jsx
+<<<<<<< HEAD
+=======
+// Global state + backend integration.
+// When backend is reachable: calls POST /analyze/triage and syncs results.
+// When backend is offline:   falls back to local AI simulation (no data loss).
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { RATNAGIRI_HOSPITALS, TOTAL_BEDS } from '../constants/hospitals';
 import { analyzeAPI, patientsAPI, alertsAPI } from '../services/api';
@@ -18,6 +24,10 @@ function severityRank(s) {
   return { critical:0, high:1, moderate:2, low:3 }[s?.toLowerCase()] ?? 4;
 }
 
+<<<<<<< HEAD
+=======
+// Map backend priority string → frontend severity key
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
 function priorityToSeverity(priority, riskScore) {
   if (!priority) return 'moderate';
   const p = priority.toUpperCase();
@@ -25,10 +35,34 @@ function priorityToSeverity(priority, riskScore) {
   if (p === 'ORANGE') return 'high';
   if (p === 'YELLOW') return 'moderate';
   if (p === 'GREEN')  return 'low';
+<<<<<<< HEAD
+=======
+  // Fallback: use risk_score
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
   if (riskScore >= 75) return 'critical';
   if (riskScore >= 50) return 'high';
   if (riskScore >= 25) return 'moderate';
   return 'low';
+<<<<<<< HEAD
+=======
+}
+
+// Local severity estimation (used when backend is offline)
+function estimateSeverity(form) {
+  let score = 0;
+  const o2 = parseFloat(form.o2), hr = parseFloat(form.hr), age = parseInt(form.age);
+  if (!isNaN(o2) && o2 < 88)  score += 3;
+  else if (!isNaN(o2) && o2 < 94) score += 1;
+  if (!isNaN(hr) && (hr > 120 || hr < 40)) score += 2;
+  if (!isNaN(age) && age >= 60) score += 1;
+  const symp = (form.symptoms || '').toLowerCase();
+  if (symp.includes('chest') || symp.includes('cardiac')) score += 3;
+  if (symp.includes('breath')) score += 2;
+  if (symp.includes('unconsci')) score += 3;
+  if (form.incidentType === 'Cardiac Event')    score += 3;
+  if (form.incidentType === 'Traffic Accident') score += 1;
+  return score >= 6 ? 'critical' : score >= 3 ? 'high' : score >= 1 ? 'moderate' : 'low';
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
 }
 
 function assignHospital(severity) {
@@ -58,16 +92,26 @@ export function EmergencyStoreProvider({ children }) {
   const [patients,       setPatients]       = useState([]);
   const [hospitals,      setHospitals]      = useState(RATNAGIRI_HOSPITALS);
   const [backendOnline,  setBackendOnline]  = useState(false);
+<<<<<<< HEAD
   const [wsAlerts,       setWsAlerts]       = useState([]);
 
   // Check backend health on mount
+=======
+  const [wsAlerts,       setWsAlerts]       = useState([]);  // real-time WS events
+
+  // ── Check backend health on mount ──────────────────────────────────
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
   useEffect(() => {
     fetch('/api/')
       .then(r => r.ok && setBackendOnline(true))
       .catch(() => setBackendOnline(false));
   }, []);
 
+<<<<<<< HEAD
   // Poll GET /patients every 15s when backend is online
+=======
+  // ── Poll GET /patients every 15 s when backend is online ───────────
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
   useEffect(() => {
     if (!backendOnline) return;
     const sync = async () => {
@@ -95,17 +139,26 @@ export function EmergencyStoreProvider({ children }) {
           source:         'backend',
         }));
         setPatients(prev => {
+<<<<<<< HEAD
+=======
+          // Merge: keep local-only entries, update/add backend ones
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
           const backendIds = new Set(mapped.map(p => p.id));
           const localOnly  = prev.filter(p => !backendIds.has(p.id) && p.source !== 'backend');
           return [...mapped, ...localOnly].sort((a,b) => severityRank(a.severity) - severityRank(b.severity));
         });
+<<<<<<< HEAD
       } catch { /* backend offline */ }
+=======
+      } catch { /* backend went offline, keep current state */ }
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
     };
     sync();
     const timer = setInterval(sync, 15000);
     return () => clearInterval(timer);
   }, [backendOnline]);
 
+<<<<<<< HEAD
   // ── addPatient (returns Promise<patient>) ─────────────────────────
   const addPatient = useCallback(async (formData) => {
     const now  = new Date();
@@ -115,6 +168,17 @@ export function EmergencyStoreProvider({ children }) {
     const localId = generateId();
     const localSeverity = 'moderate'; // placeholder
     const hospId   = 'RH01';
+=======
+  // ── addPatient — called by PatientForm on submit ───────────────────
+  const addPatient = useCallback(async (formData, localSeverity) => {
+    const now  = new Date();
+    const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+    // Optimistic local entry shown immediately
+    const localId = generateId();
+    const severity = localSeverity || estimateSeverity(formData);
+    const hospId   = assignHospital(severity);
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
 
     const optimistic = {
       id: localId, name: formData.name || 'Unknown', age: formData.age || '—',
@@ -124,12 +188,17 @@ export function EmergencyStoreProvider({ children }) {
       symptoms: formData.symptoms || '', notes: formData.notes || '',
       bp: formData.bp || '—', o2: formData.o2 || '—',
       hr: formData.hr || '—', temp: formData.temp || '—',
+<<<<<<< HEAD
       severity: localSeverity, time, date: now.toLocaleDateString('en-IN'),
+=======
+      severity, time, date: now.toLocaleDateString('en-IN'),
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
       assignedHospId: hospId, uploads: formData.uploads || {},
       source: 'local', triageData: null, logisticsData: null,
     };
 
     // Show immediately in queue
+<<<<<<< HEAD
     setPatients(prev => [optimistic, ...prev].sort((a,b) => severityRank(a.severity) - severityRank(b.severity)));
 
     if (!backendOnline) {
@@ -168,6 +237,49 @@ export function EmergencyStoreProvider({ children }) {
   }, [backendOnline]);
 
   // Handle real-time WS alert
+=======
+    setPatients(prev =>
+      [optimistic, ...prev].sort((a,b) => severityRank(a.severity) - severityRank(b.severity))
+    );
+    setHospitals(prev => prev.map(h =>
+      h.id === hospId
+        ? { ...h, usedBeds: Math.min(h.totalBeds, h.usedBeds + (severity === 'critical' ? 8 : severity === 'high' ? 4 : 2)) }
+        : h
+    ));
+
+    // ── Try calling the real backend ──────────────────────────────────
+    if (backendOnline) {
+      try {
+        const result = await analyzeAPI.triage(formData);
+        const realSeverity = priorityToSeverity(result.triage?.priority, result.triage?.risk_score);
+
+        // Replace the optimistic entry with backend-confirmed one
+        setPatients(prev => prev
+          .filter(p => p.id !== localId)
+          .concat([{
+            ...optimistic,
+            id:            result.patient_id,
+            severity:      realSeverity,
+            assignedHospId: assignHospital(realSeverity),
+            triageData:    result.triage,
+            logisticsData: result.logistics,
+            source:        'backend',
+          }])
+          .sort((a,b) => severityRank(a.severity) - severityRank(b.severity))
+        );
+
+        return { ...optimistic, id: result.patient_id, severity: realSeverity,
+                 triageData: result.triage, logisticsData: result.logistics };
+      } catch (err) {
+        console.warn('[PulseGrid] Backend triage failed, keeping local result:', err.message);
+      }
+    }
+
+    return optimistic;
+  }, [backendOnline]);
+
+  // ── Handle real-time WS alert (called from useWebSocket hook) ──────
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
   const handleWsAlert = useCallback((msg) => {
     if (msg?.type === 'critical_patient') {
       setWsAlerts(prev => [msg, ...prev].slice(0, 20));
@@ -195,7 +307,11 @@ export function useEmergencyStore() {
     metrics:       { active:0, highRisk:0, criticalAlerts:0, loadPct:0, availBeds:TOTAL_BEDS },
     backendOnline: false,
     wsAlerts:      [],
+<<<<<<< HEAD
     addPatient:    async () => {},
+=======
+    addPatient:    () => {},
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
     handleWsAlert: () => {},
   };
   return ctx;
