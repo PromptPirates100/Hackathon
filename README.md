@@ -126,11 +126,9 @@ npm run dev
 
 ### Screenshots
 
-*Screenshots*
+![Dashboard](frontend-react/src/assets/ss1.jpeg)
 
-![Dashboard](../Hackathon/frontend-react/src/assets/ss1.jpeg)
-)
-![Emergency Flow](../Hackathon/frontend-react/src/assets/ss2.jpeg)
+![Emergency Flow](frontend-react/src/assets/ss2.jpeg)
 
 ### Demo Video
 
