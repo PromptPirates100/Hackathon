@@ -128,8 +128,9 @@ npm run dev
 
 *Add screenshots here:*
 
-![Dashboard](./assets/dashboard.png)
-![Emergency Flow](./assets/workflow.png)
+![Dashboard](../Hackathon/frontend-react/src/assets/ss1.jpeg)
+)
+![Emergency Flow](../Hackathon/frontend-react/src/assets/ss2.jpeg)
 
 ### Demo Video
 
@@ -144,13 +145,6 @@ npm run dev
 - Government healthcare connectivity
 - Predictive healthcare analytics
 - AI voice assistance for low-literacy users
-
----
-
-## 👥 Team
-
-- **team** – AI/ML & Backend
-- **Team Members** – Frontend, Cloud, APIs
 
 ---
 
