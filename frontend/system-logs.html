@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseGrid AI — System Logs</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">♥</span><span class="logo-text">PulseGrid AI</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="live-queue.html">Live Queue</a></li>
+            <li><a href="critical-alerts.html">Critical Alerts</a></li>
+            <li><a href="hospitals.html">Hospitals</a></li>
+            <li><a href="analytics.html">Analytics</a></li>
+            <li><a href="emergency-intake.html">Emergency Intake</a></li>
+            <li><a href="system-logs.html" class="active">System Logs</a></li>
+            <li><a href="ai-insights.html">AI Insights</a></li>
+        </ul>
+    </nav>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <div class="top-bar-left"><div class="live-badge"><span class="live-dot"></span>LIVE SYSTEM ACTIVE</div></div>
+            <div class="top-bar-right">
+                <input type="text" class="log-search" placeholder="Search logs..." id="logSearch">
+                <a href="emergency-intake.html" class="new-intake-btn">+ New Intake</a>
+            </div>
+        </header>
+        <div class="page-content">
+            <div class="page-title-row">
+                <h1 class="page-title">System Logs</h1>
+                <span class="live-count">Real-time event stream</span>
+            </div>
+            <div class="panel">
+                <div class="log-filters">
+                    <button class="filter-btn active" data-log="all">All</button>
+                    <button class="filter-btn" data-log="triage">Triage</button>
+                    <button class="filter-btn" data-log="hospital">Hospital</button>
+                    <button class="filter-btn" data-log="fleet">Fleet</button>
+                    <button class="filter-btn" data-log="ai">AI</button>
+                    <button class="filter-btn" data-log="system">System</button>
+                </div>
+                <div class="log-stream" id="logStream">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="system-logs.js"></script>
+</body>
+</html>

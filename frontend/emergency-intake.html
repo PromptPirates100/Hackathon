@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseGrid AI — Emergency Intake Panel</title>
+    <meta name="description" content="PulseGrid AI emergency intake and triage form.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">♥</span>
+            <span class="logo-text">PulseGrid AI</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+            </a></li>
+            <li><a href="live-queue.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Live Queue
+            </a></li>
+            <li><a href="critical-alerts.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Critical Alerts
+            </a></li>
+            <li><a href="hospitals.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Hospitals
+            </a></li>
+            <li><a href="analytics.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Analytics
+            </a></li>
+            <li><a href="emergency-intake.html" class="active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                Emergency Intake
+            </a></li>
+            <li><a href="system-logs.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                System Logs
+            </a></li>
+            <li><a href="ai-insights.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                AI Insights
+            </a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+
+        <!-- TOP BAR -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <div class="live-badge"><span class="live-dot"></span>LIVE SYSTEM ACTIVE</div>
+                <span style="font-size:13px;color:#6b7280">Real-time emergency triage support</span>
+            </div>
+            <div class="top-bar-right">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <div>
+                        <strong>LIVE SYSTEM ACTIVE</strong>
+                        <p>Real-time emergency triage support.</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <div class="page-content">
+            <div class="page-title-row">
+                <h1 class="page-title">Emergency Intake Panel</h1>
+            </div>
+
+            <!-- INTAKE GRID -->
+            <div class="dashboard-grid">
+
+                <!-- LEFT: FORM -->
+                <div class="panel intake-panel">
+                    <h2>Free Emergency Intake Form</h2>
+                    <form id="intake-form">
+
+                        <div class="form-row two-cols-uneven">
+                            <!-- Left form column -->
+                            <div class="form-group-group">
+                                <div class="form-row two-cols">
+                                    <div class="form-group">
+                                        <label>Patient Information</label>
+                                        <input type="text" placeholder="Name" id="patientName">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Age</label>
+                                        <input type="number" value="6" id="patientAge" min="0" max="120">
+                                    </div>
+                                </div>
+                                <div class="form-row two-cols">
+                                    <div class="form-group">
+                                        <label>Gender</label>
+                                        <select id="patientGender">
+                                            <option value="">Gender</option>
+                                            <option>Male</option>
+                                            <option>Female</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Contact</label>
+                                        <input type="text" placeholder="Contact (optional)" id="patientContact">
+                                    </div>
+                                </div>
+
+                                <div class="form-section-title">Vitals Section</div>
+                                <div class="form-row two-cols">
+                                    <div class="form-group">
+                                        <input type="text" placeholder="Blood Pressure" id="vitalsBP">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" placeholder="Oxygen Level (%)" id="vitalsO2">
+                                    </div>
+                                </div>
+                                <div class="form-row two-cols">
+                                    <div class="form-group">
+                                        <input type="text" placeholder="Heart Rate (bpm)" id="vitalsHR">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" placeholder="Temperature (°C)" id="vitalsTemp">
+                                    </div>
+                                </div>
+
+                                <div class="form-section-title">Incident Context</div>
+                                <div class="form-row two-cols">
+                                    <div class="form-group">
+                                        <select id="incidentType">
+                                            <option value="">Accident Type</option>
+                                            <option>Traffic Accident</option>
+                                            <option>Fall / Slip</option>
+                                            <option>Cardiac Event</option>
+                                            <option>Respiratory</option>
+                                            <option>Burns</option>
+                                            <option>Other Medical</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" placeholder="Location" id="incidentLocation">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <textarea placeholder="Emergency Notes" id="incidentNotes" rows="3"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Right form column -->
+                            <div class="form-group-group">
+                                <div class="form-group" style="flex:1;display:flex;flex-direction:column;">
+                                    <label>Symptoms Section</label>
+                                    <textarea placeholder="Enter symptoms (e.g., chest pain, dizziness, breathing difficulty)" class="symptoms-textarea" id="symptomsText"></textarea>
+                                </div>
+                                <div class="form-section-title" style="margin-top:12px;">Upload Section</div>
+                                <div class="upload-buttons">
+                                    <button type="button" class="upload-btn" id="uploadXray">X-ray</button>
+                                    <button type="button" class="upload-btn" id="uploadWound">Wound image</button>
+                                    <button type="button" class="upload-btn" id="uploadScan">Scan</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="analyzeBtn">Analyze Emergency Severity</button>
+                    </form>
+                </div>
+
+                <!-- RIGHT: RESULTS -->
+                <div class="results-column">
+
+                    <!-- Processing + Triage result -->
+                    <div class="results-top-row">
+                        <!-- Processing steps -->
+                        <div class="panel processing-panel">
+                            <ul class="processing-list" id="processingList">
+                                <li class="pending" id="step-1"><span class="icon dot"></span> Analyzing emergency severity...</li>
+                                <li class="pending" id="step-2"><span class="icon dot"></span> Running triage intelligence...</li>
+                                <li class="pending" id="step-3"><span class="icon dot"></span> Evaluating logistics & hospital availability...</li>
+                                <li class="pending" id="step-4"><span class="icon dot"></span> Generating action plan...</li>
+                            </ul>
+                        </div>
+
+                        <!-- Triage result -->
+                        <div class="panel triage-panel" id="triagePanel" style="display:none;">
+                            <h2>Results Panel</h2>
+                            <div class="triage-section-title">TRIAGE RESULT</div>
+                            <div class="triage-card red-alert">
+                                <div class="triage-info">Priority: <strong>RED</strong></div>
+                                <div class="triage-info">Severity: <strong>CRITICAL</strong></div>
+                                <div class="triage-info">Risk Score: <strong>98%</strong></div>
+                            </div>
+                            <div class="triage-section-title">QUICK PRECAUTIONS</div>
+                            <div class="precautions-card">
+                                <ul>
+                                    <li>Immediate oxygen stabilization required</li>
+                                    <li>Prepare trauma response team</li>
+                                    <li>Monitor respiratory instability</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Reasoning + Logistics -->
+                    <div class="panel reasoning-panel" id="reasoningPanel" style="display:none;">
+                        <h2>Results Panel</h2>
+                        <div class="reasoning-grid">
+                            <div class="reasoning-col">
+                                <h3>AI REASONING</h3>
+                                <ul class="bullet-list">
+                                    <li>Low oxygen detected</li>
+                                    <li>Advanced age risk factor</li>
+                                    <li>Chest pain indicates cardiac emergency</li>
+                                </ul>
+                            </div>
+                            <div class="reasoning-col">
+                                <h3>LOGISTICS RECOMMENDATION</h3>
+                                <p class="logistics-item"><strong>Recommended hospital</strong></p>
+                                <p class="logistics-item">Distance: 35 km</p>
+                                <p class="logistics-item">ETA: 27 min</p>
+                                <p class="logistics-item urgency-text">Urgency: This surpasses the recommended route.</p>
+                            </div>
+                            <div class="reasoning-col">
+                                <h3>Map View</h3>
+                                <div class="map-container" id="mapView"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

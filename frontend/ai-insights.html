@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseGrid AI — AI Insights</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">♥</span><span class="logo-text">PulseGrid AI</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="live-queue.html">Live Queue</a></li>
+            <li><a href="critical-alerts.html">Critical Alerts</a></li>
+            <li><a href="hospitals.html">Hospitals</a></li>
+            <li><a href="analytics.html">Analytics</a></li>
+            <li><a href="emergency-intake.html">Emergency Intake</a></li>
+            <li><a href="system-logs.html">System Logs</a></li>
+            <li><a href="ai-insights.html" class="active">AI Insights</a></li>
+        </ul>
+    </nav>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <div class="top-bar-left"><div class="live-badge"><span class="live-dot"></span>LIVE SYSTEM ACTIVE</div></div>
+            <div class="top-bar-right"><a href="emergency-intake.html" class="new-intake-btn">+ New Intake</a></div>
+        </header>
+        <div class="page-content">
+            <div class="page-title-row">
+                <h1 class="page-title">AI Operational Insights</h1>
+                <span class="live-count">Powered by PulseGrid Intelligence</span>
+            </div>
+            <div class="insights-grid">
+                <div class="panel insight-card critical-insight">
+                    <div class="insight-icon red">⚡</div>
+                    <h3>Emergency Load Spike</h3>
+                    <p>Emergency load increased by <strong>32%</strong> in the last 2 hours. Predominantly cardiac and trauma cases in the north district.</p>
+                    <div class="insight-confidence">Confidence: <strong>94%</strong></div>
+                </div>
+                <div class="panel insight-card">
+                    <div class="insight-icon orange">📈</div>
+                    <h3>Cardiac Trend Alert</h3>
+                    <p>Cardiac emergencies trending <strong>upward</strong> — 7 cases in 3 hours vs. daily average of 4. Cardiologist pre-alerting recommended.</p>
+                    <div class="insight-confidence">Confidence: <strong>88%</strong></div>
+                </div>
+                <div class="panel insight-card">
+                    <div class="insight-icon orange">🫁</div>
+                    <h3>Respiratory Instability Spike</h3>
+                    <p>Spike in respiratory distress cases detected. Likely correlated with high pollution index today. Recommend pre-positioning oxygen units.</p>
+                    <div class="insight-confidence">Confidence: <strong>81%</strong></div>
+                </div>
+                <div class="panel insight-card">
+                    <div class="insight-icon blue">🏥</div>
+                    <h3>ICU Threshold Warning</h3>
+                    <p>Regional ICU capacity is at <strong>76%</strong>. Predictive model estimates full saturation within 4.5 hours if current intake rate continues.</p>
+                    <div class="insight-confidence">Confidence: <strong>79%</strong></div>
+                </div>
+                <div class="panel insight-card">
+                    <div class="insight-icon green">🚑</div>
+                    <h3>Fleet Positioning Suggestion</h3>
+                    <p>AI recommends pre-positioning <strong>2 ALS units</strong> to the South district based on historical pattern and current load distribution.</p>
+                    <div class="insight-confidence">Confidence: <strong>85%</strong></div>
+                </div>
+                <div class="panel insight-card">
+                    <div class="insight-icon blue">🔄</div>
+                    <h3>Routing Optimization</h3>
+                    <p>Current routing model saved an average of <strong>3.2 minutes</strong> per dispatch today. Route via Highway 4 flagged as faster for north corridor.</p>
+                    <div class="insight-confidence">Confidence: <strong>92%</strong></div>
+                </div>
+            </div>
+
+            <div class="panel mt-24">
+                <h2>Prediction Accuracy Over Time</h2>
+                <canvas id="aiAccuracyChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="ai-insights.js"></script>
+</body>
+</html>
