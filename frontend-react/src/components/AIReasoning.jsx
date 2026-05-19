@@ -4,58 +4,29 @@ import RatnagiriMap from './RatnagiriMap';
 const SEV_COLOR = { critical:'#dc2626', high:'#ea580c', moderate:'#d97706', low:'#16a34a' };
 const SEV_LABEL = { critical:'CRITICAL — RED', high:'HIGH — ORANGE', moderate:'MODERATE — YELLOW', low:'LOW — GREEN' };
 
-function deriveReasoning(data) {
-  // data shape: { form: { name, age, bp, o2, hr, temp, symptoms, incidentType, ... }, uploads }
-  const form = data?.form || data || {};
-  const reasoning = [];
-  let score = 0;
-
-  const o2  = parseFloat(form.o2);
-  const hr  = parseFloat(form.hr);
-  const age = parseInt(form.age);
-
-  if (!isNaN(o2)) {
-    if (o2 < 88)  { reasoning.push('⚠ Critical oxygen level (' + o2 + '%) — hypoxia detected'); score += 3; }
-    else if (o2 < 94) { reasoning.push('Low oxygen saturation (' + o2 + '%) — monitor closely'); score += 1; }
-    else reasoning.push('Oxygen level within acceptable range (' + o2 + '%)');
-  }
-
-  if (!isNaN(hr)) {
-    if (hr > 120 || hr < 40) { reasoning.push('⚠ Abnormal heart rate (' + hr + ' bpm) — cardiac monitoring needed'); score += 2; }
-    else if (hr > 100) { reasoning.push('Elevated heart rate (' + hr + ' bpm) — tachycardia noted'); score += 1; }
-    else reasoning.push('Heart rate within normal range (' + hr + ' bpm)');
-  }
-
-  if (!isNaN(age) && age >= 60) { reasoning.push('Advanced age (' + age + ' yrs) — elevated risk factor'); score += 1; }
-
-  const symp = (form.symptoms || '').toLowerCase();
-  if (symp.includes('chest pain') || symp.includes('cardiac'))   { reasoning.push('⚠ Chest pain reported — possible cardiac emergency'); score += 3; }
-  if (symp.includes('breath') || symp.includes('respiratory'))   { reasoning.push('⚠ Respiratory distress indicated'); score += 2; }
-  if (symp.includes('unconsci') || symp.includes('faint'))       { reasoning.push('⚠ Loss of consciousness reported'); score += 3; }
-  if (symp.includes('bleed') || symp.includes('hemorrh'))        { reasoning.push('⚠ Active bleeding indicated'); score += 2; }
-
-  if (form.incidentType === 'Traffic Accident') { reasoning.push('Traffic trauma — multi-system injury risk'); score += 1; }
-  if (form.incidentType === 'Cardiac Event')    { reasoning.push('⚠ Cardiac event — immediate intervention required'); score += 3; }
-
-  if (reasoning.length === 0) reasoning.push('Standard assessment performed. No critical flags detected.');
-
-  const severity = score >= 6 ? 'critical' : score >= 3 ? 'high' : score >= 1 ? 'moderate' : 'low';
-  return { reasoning, severity };
-}
-
 export default function AIReasoning({ visible, data }) {
   if (!visible || !data) return null;
 
-  const { reasoning, severity } = deriveReasoning(data);
-  const form = data?.form || {};
-  const patientName = form.name || '';
-  const eta = severity === 'critical' ? '8–12 min' : severity === 'high' ? '15–20 min' : '25–35 min';
-  const transport = severity === 'critical' ? 'ALS Ambulance (Critical Care)' : severity === 'high' ? 'BLS Ambulance' : 'Patient Vehicle / BLS';
+  // Real backend triage & logistics
+  const triage = data.triageData;
+  const logistics = data.logisticsData;
+
+  const reasoningList = triage?.reasoning || [];
+  const severity      = triage?.severity || 'moderate';
+  const priority      = triage?.priority || '—';
+  const riskScore     = triage?.risk_score ?? '—';
+  const recommendation = triage?.recommendation || 'Follow clinical protocol.';
+  const hospitalName  = logistics?.nearest_hospital || 'Searching...';
+  const urgency       = logistics?.urgency || '—';
+  const eta           = logistics?.estimated_response || '—';
+  const transport     = severity === 'critical' || severity === 'high' ? 'ALS Ambulance' : 'BLS Ambulance';
+
+  // Hospitals for the map – if the backend sent alternatives, use them; otherwise empty
+  const mapHospitals = logistics?.alternatives || [];
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-
-      {/* Triage Result + Reasoning */}
+      {/* ── Triage Result Card ── */}
       <div className="panel">
         <h2>AI Triage Result</h2>
         <div className="triage-result-card" style={{
@@ -67,13 +38,24 @@ export default function AIReasoning({ visible, data }) {
           </div>
         </div>
 
+        {/* Clinical Reasoning */}
         <div className="section-label" style={{ marginTop:14 }}>AI CLINICAL REASONING</div>
         <ul className="reasoning-list" style={{ marginBottom:14 }}>
-          {reasoning.map((r, i) => (
+          {reasoningList.map((r, i) => (
             <li key={i} className={r.startsWith('⚠') ? 'finding-warning-inline' : ''}>{r}</li>
           ))}
+          {reasoningList.length === 0 && (
+            <li style={{ color:'#9ca3af' }}>Awaiting complete analysis...</li>
+          )}
         </ul>
 
+        {/* Recommended Actions */}
+        <div className="section-label">RECOMMENDED ACTIONS</div>
+        <div style={{ background:'#f9fafb', border:'1px solid var(--border)', borderRadius:8, padding:12, marginBottom:14, fontSize:13, lineHeight:1.5 }}>
+          {recommendation}
+        </div>
+
+        {/* Logistics Grid */}
         <div className="section-label">LOGISTICS</div>
         <div className="logistics-grid">
           <div className="logistics-box">
@@ -86,20 +68,24 @@ export default function AIReasoning({ visible, data }) {
           </div>
           <div className="logistics-box">
             <span className="l-icon">📍</span>
-            <div><strong>Region</strong><span>Ratnagiri, MH</span></div>
+            <div><strong>Nearest Hospital</strong><span>{hospitalName}</span></div>
           </div>
         </div>
       </div>
 
-      {/* Hospital Map */}
+      {/* ── Hospital Map ── */}
       <div className="panel">
         <h2>Hospital Map — Ratnagiri, Maharashtra</h2>
         <p style={{ fontSize:12, color:'#6b7280', marginBottom:12 }}>
           ★ Recommended hospital based on severity: <strong>{SEV_LABEL[severity]}</strong>
         </p>
-        <RatnagiriMap severity={severity} patientName={patientName} />
+        <RatnagiriMap
+          severity={severity}
+          patientName={data.name || '—'}
+          hospitals={mapHospitals}
+          nearestHospital={hospitalName}
+        />
       </div>
-
     </div>
   );
 }

@@ -1,7 +1,10 @@
 import os
 import ssl
+<<<<<<< HEAD
+=======
 import time
 import uuid
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.logger import setup_logger
 
@@ -126,12 +129,25 @@ class DatabaseService:
         if not uri:
             raise ValueError("MONGODB_URI not set")
 
+<<<<<<< HEAD
+        # Python 3.13 has stricter TLS defaults that break older MongoDB Atlas SSL.
+        # Creating a permissive SSL context resolves TLSV1_ALERT_INTERNAL_ERROR.
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
+
+=======
         # Python 3.13 needs tlsAllowInvalidCertificates for Atlas SSL
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
         cls.client = AsyncIOMotorClient(
             uri,
             tls=True,
             tlsAllowInvalidCertificates=True,
+<<<<<<< HEAD
+            serverSelectionTimeoutMS=10000,
+=======
             serverSelectionTimeoutMS=8000,
+>>>>>>> f1802f27deecd691559c1d22c266600b65cb4bf4
         )
         cls.db = cls.client[db_name]
         # Trigger actual connection
