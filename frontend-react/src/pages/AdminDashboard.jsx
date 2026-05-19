@@ -1,60 +1,129 @@
 // src/pages/AdminDashboard.jsx
-import MetricsCards from '../components/MetricsCards';
-import QueueTable from '../components/QueueTable';
-import AlertPanel from '../components/AlertPanel';
-import HospitalMap from '../components/HospitalMap';
 import { useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+import MetricsCards from '../components/MetricsCards';
+import QueueTable   from '../components/QueueTable';
+import AlertPanel   from '../components/AlertPanel';
+import HospitalMap  from '../components/HospitalMap';
+import { useEmergencyStore } from '../context/EmergencyStore';
 
-function Sparkline({ id, data, color }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    const ctx = ref.current?.getContext('2d');
-    if (!ctx) return;
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: { labels: data.map((_,i)=>i), datasets: [{ data, borderColor: color, fill: false, tension: 0.4, pointRadius: 0, borderWidth: 2 }] },
-      options: { animation: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-    });
-    return () => chart.destroy();
-  }, []);
-  return <canvas ref={ref} width={80} height={28}></canvas>;
-}
+Chart.register(...registerables);
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.font.size   = 11;
+Chart.defaults.color       = '#6b7280';
 
 function AnalyticsSection() {
-  const sevRef = useRef(null), trendRef = useRef(null), utilRef = useRef(null);
+  const { patients } = useEmergencyStore();
+
+  const sevRef  = useRef(null);
+  const typeRef = useRef(null);
+  const sevChart  = useRef(null);
+  const typeChart = useRef(null);
+
   useEffect(() => {
-    const charts = [];
-    if (sevRef.current) charts.push(new Chart(sevRef.current.getContext('2d'), {
-      type: 'doughnut',
-      data: { labels:['Red','Yellow','Blue'], datasets:[{ data:[18,22,12], backgroundColor:['#dc2626','#d97706','#2563eb'], borderWidth:2, borderColor:'#fff' }] },
-      options: { cutout:'65%', plugins:{ legend:{ display:true, position:'bottom', labels:{ font:{ size:10 } } } } }
-    }));
-    if (trendRef.current) charts.push(new Chart(trendRef.current.getContext('2d'), {
-      type: 'line',
-      data: { labels:['08:00','10:00','12:00','14:00','16:00'], datasets:[
-        { data:[20,35,45,60,52], borderColor:'#dc2626', fill:false, tension:0.4, pointRadius:2 },
-        { data:[30,28,32,40,38], borderColor:'#2563eb', fill:false, tension:0.4, pointRadius:2 }
-      ]},
-      options: { plugins:{ legend:{display:false} }, scales:{ x:{grid:{display:false}}, y:{beginAtZero:true,max:100} } }
-    }));
-    if (utilRef.current) charts.push(new Chart(utilRef.current.getContext('2d'), {
-      type: 'bar',
-      data: { labels:['CTC','Metro','EUA','SMM','NGH'], datasets:[{ data:[88,62,100,35,40], backgroundColor:['#dc2626','#ea580c','#991b1b','#16a34a','#16a34a'], borderRadius:3 }] },
-      options: { plugins:{ legend:{display:false} }, scales:{ y:{beginAtZero:true,max:100} } }
-    }));
-    return () => charts.forEach(c => c.destroy());
-  }, []);
+    // Severity donut
+    const sevCounts = {
+      Critical: patients.filter(p => p.severity === 'critical').length,
+      High:     patients.filter(p => p.severity === 'high').length,
+      Moderate: patients.filter(p => p.severity === 'moderate').length,
+      Low:      patients.filter(p => p.severity === 'low').length,
+    };
+
+    // Incident types count
+    const typeMap = {};
+    patients.forEach(p => {
+      const t = p.incident || 'Other';
+      typeMap[t] = (typeMap[t] || 0) + 1;
+    });
+    const typeLabels = Object.keys(typeMap);
+    const typeData   = Object.values(typeMap);
+
+    // Destroy old charts
+    sevChart.current?.destroy();
+    typeChart.current?.destroy();
+
+    if (sevRef.current) {
+      sevChart.current = new Chart(sevRef.current.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Critical','High','Moderate','Low'],
+          datasets: [{ data: [sevCounts.Critical, sevCounts.High, sevCounts.Moderate, sevCounts.Low],
+            backgroundColor:['#dc2626','#ea580c','#d97706','#16a34a'], borderWidth:2, borderColor:'#fff' }]
+        },
+        options: { cutout:'65%', plugins:{ legend:{ display:true, position:'bottom' } } }
+      });
+    }
+
+    if (typeRef.current && typeLabels.length > 0) {
+      typeChart.current = new Chart(typeRef.current.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: typeLabels,
+          datasets: [{ data: typeData, backgroundColor:'#2563eb', borderRadius:5 }]
+        },
+        options: {
+          indexAxis: 'y',
+          plugins:{ legend:{ display:false } },
+          scales:{ x:{ beginAtZero:true, ticks:{ stepSize:1 } }, y:{ grid:{ display:false } } }
+        }
+      });
+    }
+
+    return () => { sevChart.current?.destroy(); typeChart.current?.destroy(); };
+  }, [patients]);
+
+  if (patients.length === 0) {
+    return (
+      <div className="panel">
+        <h2>Analytics Section</h2>
+        <div style={{ textAlign:'center', padding:'32px 0', color:'#9ca3af', fontSize:13 }}>
+          <div style={{ fontSize:28, marginBottom:8 }}>📊</div>
+          Analytics will populate once staff submit patient intake records.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="panel">
-      <h2>Analytics Section</h2>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:16 }}>
-        <div><h4 style={{fontSize:12,color:'#6b7280',marginBottom:8}}>Severity distribution</h4><canvas ref={sevRef} height={160}></canvas></div>
-        <div><h4 style={{fontSize:12,color:'#6b7280',marginBottom:8}}>Emergency trends</h4><canvas ref={trendRef} height={160}></canvas></div>
-        <div><h4 style={{fontSize:12,color:'#6b7280',marginBottom:8}}>Hospital utilization</h4><canvas ref={utilRef} height={160}></canvas></div>
+      <h2>Analytics Section — Live Patient Data</h2>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24 }}>
+        <div>
+          <h4 style={{ fontSize:12, color:'#6b7280', marginBottom:8 }}>Severity Distribution ({patients.length} patients)</h4>
+          <canvas ref={sevRef} height={200}></canvas>
+        </div>
+        <div>
+          <h4 style={{ fontSize:12, color:'#6b7280', marginBottom:8 }}>Cases by Incident Type</h4>
+          {patients.length > 0
+            ? <canvas ref={typeRef} height={200}></canvas>
+            : <div style={{ color:'#9ca3af', fontSize:13 }}>No data yet</div>
+          }
+        </div>
       </div>
+    </div>
+  );
+}
+
+function AIInsightsPanel() {
+  const { patients, metrics } = useEmergencyStore();
+  const insights = [];
+  if (patients.length === 0) insights.push('No active emergencies — system standing by.');
+  if (metrics.criticalAlerts > 0) insights.push(`⚠ ${metrics.criticalAlerts} critical patient(s) require immediate attention.`);
+  if (metrics.highRisk > 3)       insights.push(`Emergency load elevated — ${metrics.highRisk} high-risk cases active.`);
+  if (metrics.loadPct >= 70)      insights.push(`⚠ Hospital capacity at ${metrics.loadPct}% — consider diversifying to Civil Hospital.`);
+  if (metrics.availBeds < 20)     insights.push(`⚠ Available beds critically low: ${metrics.availBeds} remaining.`);
+  if (patients.length > 0)        insights.push(`${patients.length} total patient(s) registered. Queue sorted by severity.`);
+  const cardiac = patients.filter(p => p.incident?.toLowerCase().includes('cardiac')).length;
+  if (cardiac > 0)                insights.push(`${cardiac} cardiac case(s) active — notify cardiology team.`);
+
+  return (
+    <div className="panel">
+      <h2>AI Operational Insights</h2>
+      <ul className="ai-list">
+        {insights.map((ins, i) => (
+          <li key={i} className={ins.startsWith('⚠') ? 'finding-warning-inline' : ''}>{ins}</li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -71,16 +140,7 @@ export default function AdminDashboard() {
         </div>
         <div className="admin-col">
           <HospitalMap />
-          <div className="panel">
-            <h2>AI Operational Insights</h2>
-            <ul className="ai-list">
-              <li>Emergency load increased by 32% <span className="ai-tag">(AI analysis)</span></li>
-              <li>Cardiac emergencies trending upward <span className="ai-tag">(AI analysis)</span></li>
-              <li>Respiratory instability spike detected <span className="ai-tag">(AI analysis)</span></li>
-              <li>ICU capacity nearing critical threshold <span className="ai-tag">(AI analysis)</span></li>
-              <li>Pre-position 2 ALS units south <span className="ai-tag">(AI suggestion)</span></li>
-            </ul>
-          </div>
+          <AIInsightsPanel />
         </div>
       </div>
     </div>

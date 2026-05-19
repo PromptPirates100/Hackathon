@@ -1,5 +1,7 @@
 // src/components/PatientForm.jsx
 import { useState } from 'react';
+import { useEmergencyStore } from '../context/EmergencyStore';
+import UploadModal from './UploadModal';
 
 const STEP_TEXTS = [
   'Analyzing emergency severity...',
@@ -8,146 +10,159 @@ const STEP_TEXTS = [
   'Generating action plan...',
 ];
 
+function deriveFormSeverity(form) {
+  let score = 0;
+  const o2  = parseFloat(form.o2);
+  const hr  = parseFloat(form.hr);
+  const age = parseInt(form.age);
+  if (!isNaN(o2) && o2 < 88)  score += 3;
+  else if (!isNaN(o2) && o2 < 94) score += 1;
+  if (!isNaN(hr) && (hr > 120 || hr < 40)) score += 2;
+  if (!isNaN(age) && age >= 60) score += 1;
+  const symp = (form.symptoms || '').toLowerCase();
+  if (symp.includes('chest pain') || symp.includes('cardiac')) score += 3;
+  if (symp.includes('breath') || symp.includes('respiratory')) score += 2;
+  if (symp.includes('unconsci') || symp.includes('faint'))     score += 3;
+  if (form.incidentType === 'Cardiac Event')    score += 3;
+  if (form.incidentType === 'Traffic Accident') score += 1;
+  return score >= 6 ? 'critical' : score >= 3 ? 'high' : score >= 1 ? 'moderate' : 'low';
+}
+
 export default function PatientForm({ onAnalysisComplete }) {
-  const [form, setForm] = useState({ name:'', age:'', gender:'', contact:'', bp:'', o2:'', hr:'', temp:'', incidentType:'', location:'', notes:'', symptoms:'' });
-  const [steps, setSteps] = useState(STEP_TEXTS.map(() => 'pending'));
-  const [btnState, setBtnState] = useState('idle'); // idle | loading | done
-  const [uploads, setUploads] = useState({ xray: false, wound: false, scan: false });
+  const { addPatient } = useEmergencyStore();
+  const [form, setForm] = useState({
+    name:'', age:'', gender:'', contact:'',
+    bp:'', o2:'', hr:'', temp:'',
+    incidentType:'', location:'', notes:'', symptoms:''
+  });
+  const [steps, setSteps]    = useState(STEP_TEXTS.map(() => 'pending'));
+  const [btnState, setBtnState] = useState('idle');
+  const [uploads, setUploads] = useState({ xray:null, wound:null, scan:null });
+  const [modal, setModal]    = useState(null);
 
-  const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
-  const handleUpload = (key) => {
-    setUploads(u => ({ ...u, [key]: 'loading' }));
-    setTimeout(() => setUploads(u => ({ ...u, [key]: 'done' })), 900);
+  const handleUploadDone = ({ type, file, analysis }) => {
+    setUploads(u => ({ ...u, [type]: { file, analysis } }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     setBtnState('loading');
     setSteps(STEP_TEXTS.map(() => 'pending'));
-    if (onAnalysisComplete) onAnalysisComplete(false);
+    if (onAnalysisComplete) onAnalysisComplete(null);
 
     let i = 0;
     const next = () => {
-      setSteps(prev => prev.map((s, idx) => {
-        if (idx < i) return 'done';
-        if (idx === i) return 'active';
-        return 'pending';
-      }));
+      setSteps(prev => prev.map((_, idx) =>
+        idx < i ? 'done' : idx === i ? 'active' : 'pending'
+      ));
       i++;
-      if (i <= STEP_TEXTS.length) setTimeout(next, 900);
+      if (i <= STEP_TEXTS.length) { setTimeout(next, 900); }
       else {
         setSteps(STEP_TEXTS.map(() => 'done'));
         setBtnState('done');
-        if (onAnalysisComplete) onAnalysisComplete(true);
+        const severity = deriveFormSeverity(form);
+        // Save to global store (admin dashboard reads this)
+        addPatient({ ...form, uploads }, severity);
+        if (onAnalysisComplete) onAnalysisComplete({ form: { ...form, uploads }, uploads });
         setTimeout(() => setBtnState('idle'), 3000);
       }
     };
     next();
   };
 
-  const uploadLabel = (key) => {
-    const s = uploads[key];
-    if (s === 'loading') return 'Uploading...';
-    if (s === 'done') return '✓ Uploaded';
-    return { xray: 'X-ray', wound: 'Wound image', scan: 'Scan' }[key];
+  const uploadLabel = key => {
+    if (uploads[key]) return '✓ ' + { xray:'X-Ray', wound:'Wound', scan:'Scan' }[key];
+    return { xray:'X-Ray', wound:'Wound Image', scan:'CT/MRI Scan' }[key];
   };
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      {/* Patient Form Panel */}
-      <div className="panel" style={{ flex: 1 }}>
-        <h2>Free Emergency Intake Form</h2>
-        <form id="intake-form" onSubmit={handleSubmit}>
-          {/* Patient Info */}
+      {modal && (
+        <UploadModal
+          type={modal}
+          severity={deriveFormSeverity(form)}
+          onClose={() => setModal(null)}
+          onComplete={result => { handleUploadDone(result); setModal(null); }}
+        />
+      )}
+
+      <div className="panel" style={{ flex:1 }}>
+        <h2>Emergency Intake Form</h2>
+        <form onSubmit={handleSubmit}>
           <div className="two-col">
-            <div className="form-group">
-              <label>Patient Information</label>
-              <input placeholder="Name" value={form.name} onChange={set('name')} />
-            </div>
-            <div className="form-group">
-              <label>Age</label>
-              <input type="number" value={form.age} onChange={set('age')} min="0" max="120" />
-            </div>
+            <div className="form-group"><label>Patient Name</label><input placeholder="Full name" value={form.name} onChange={set('name')} /></div>
+            <div className="form-group"><label>Age</label><input type="number" placeholder="Age" value={form.age} onChange={set('age')} min="0" max="120" /></div>
           </div>
           <div className="two-col">
-            <div className="form-group">
-              <label>Gender</label>
+            <div className="form-group"><label>Gender</label>
               <select value={form.gender} onChange={set('gender')}>
-                <option value="">Gender</option>
-                <option>Male</option><option>Female</option><option>Other</option>
+                <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
               </select>
             </div>
-            <div className="form-group">
-              <label>Contact</label>
-              <input placeholder="Contact (optional)" value={form.contact} onChange={set('contact')} />
-            </div>
+            <div className="form-group"><label>Contact (optional)</label><input placeholder="Phone number" value={form.contact} onChange={set('contact')} /></div>
           </div>
 
-          {/* Vitals */}
-          <div className="form-section-title">Vitals Section</div>
+          <div className="form-section-title">Vitals</div>
           <div className="two-col">
-            <input placeholder="Blood Pressure" value={form.bp} onChange={set('bp')} />
-            <input placeholder="Oxygen Level (%)" value={form.o2} onChange={set('o2')} />
+            <input placeholder="Blood Pressure (e.g. 120/80)" value={form.bp}   onChange={set('bp')} />
+            <input placeholder="Oxygen Level (%)"              value={form.o2}   onChange={set('o2')} />
           </div>
-          <div className="two-col" style={{ marginTop: 8 }}>
-            <input placeholder="Heart Rate (bpm)" value={form.hr} onChange={set('hr')} />
-            <input placeholder="Temperature (°C)" value={form.temp} onChange={set('temp')} />
+          <div className="two-col" style={{ marginTop:8 }}>
+            <input placeholder="Heart Rate (bpm)"              value={form.hr}   onChange={set('hr')} />
+            <input placeholder="Temperature (°C)"              value={form.temp} onChange={set('temp')} />
           </div>
 
-          {/* Incident */}
-          <div className="form-section-title">Incident Context</div>
+          <div className="form-section-title">Incident Details</div>
           <div className="two-col">
             <select value={form.incidentType} onChange={set('incidentType')}>
               <option value="">Accident Type</option>
-              <option>Traffic Accident</option>
-              <option>Fall / Slip</option>
-              <option>Cardiac Event</option>
-              <option>Respiratory</option>
-              <option>Burns</option>
-              <option>Other Medical</option>
+              <option>Traffic Accident</option><option>Fall / Slip</option>
+              <option>Cardiac Event</option><option>Respiratory Emergency</option>
+              <option>Burns</option><option>Trauma / Assault</option><option>Other Medical</option>
             </select>
-            <input placeholder="Location" value={form.location} onChange={set('location')} />
+            <input placeholder="Location / Address" value={form.location} onChange={set('location')} />
           </div>
-          <div className="form-group" style={{ marginTop: 8 }}>
-            <textarea rows={2} placeholder="Emergency Notes" value={form.notes} onChange={set('notes')} />
+          <div className="form-group" style={{ marginTop:8 }}>
+            <textarea rows={2} placeholder="Emergency notes..." value={form.notes} onChange={set('notes')} />
           </div>
 
-          {/* Symptoms */}
-          <div className="form-section-title">Symptoms Section</div>
+          <div className="form-section-title">Symptoms</div>
           <div className="form-group">
-            <textarea rows={5} className="symptoms-ta" placeholder="Enter symptoms (e.g., chest pain, dizziness, breathing difficulty)" value={form.symptoms} onChange={set('symptoms')} />
+            <textarea rows={4} className="symptoms-ta"
+              placeholder="Describe symptoms in detail..."
+              value={form.symptoms} onChange={set('symptoms')} />
           </div>
 
-          {/* Upload */}
-          <div className="form-section-title">Upload Section</div>
+          <div className="form-section-title">Medical Images (Optional)</div>
           <div className="upload-row">
             {['xray','wound','scan'].map(k => (
-              <button type="button" key={k} className={`upload-btn ${uploads[k] === 'done' ? 'done' : ''}`} onClick={() => handleUpload(k)}>
+              <button type="button" key={k}
+                className={`upload-btn ${uploads[k] ? 'done' : ''}`}
+                onClick={() => setModal(k)}>
                 {uploadLabel(k)}
               </button>
             ))}
           </div>
 
-          <button
-            type="submit"
+          <button type="submit"
             className={`submit-btn ${btnState === 'done' ? 'done' : ''}`}
-            disabled={btnState === 'loading'}
-          >
-            {btnState === 'loading' ? 'Analyzing...' : btnState === 'done' ? '✓ Analysis Complete' : 'Analyze Emergency Severity'}
+            disabled={btnState === 'loading'}>
+            {btnState === 'loading' ? 'Analyzing...' : btnState === 'done' ? '✓ Submitted to Dashboard' : 'Analyze & Submit to Dashboard'}
           </button>
         </form>
       </div>
 
-      {/* Processing Steps */}
       <div className="panel">
+        <h4 style={{ fontSize:13, fontWeight:700, marginBottom:12, color:'#374151' }}>AI Processing Pipeline</h4>
         <ul className="step-list">
           {STEP_TEXTS.map((text, i) => (
             <li key={i} className={`step-item ${steps[i]}`}>
               <span className="step-icon">
-                {steps[i] === 'done'   && <span style={{color:'#2563eb',fontWeight:700}}>✓</span>}
-                {steps[i] === 'active' && <span className="spinner"></span>}
-                {steps[i] === 'pending'&& <span className="step-dot"></span>}
+                {steps[i] === 'done'    && <span style={{ color:'#16a34a', fontWeight:700 }}>✓</span>}
+                {steps[i] === 'active'  && <span className="spinner"></span>}
+                {steps[i] === 'pending' && <span className="step-dot"></span>}
               </span>
               {text}
             </li>
