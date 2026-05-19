@@ -1,6 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from routes import analyze, patients, alerts, analytics
 from services.websocket_manager import websocket_endpoint
@@ -28,6 +29,15 @@ app = FastAPI(
     description="Multi-Agent Emergency Intelligence & Triage Coordination System",
     version="1.0.0",
     lifespan=lifespan
+)
+
+# Allow React frontend (dev + prod) to call the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000", "*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(analyze.router, prefix="/analyze", tags=["Analysis"])

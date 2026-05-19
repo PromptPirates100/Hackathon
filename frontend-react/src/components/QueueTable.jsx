@@ -6,6 +6,14 @@ const SEV_COLOR = { critical:'#dc2626', high:'#ea580c', moderate:'#d97706', low:
 const SEV_LABEL = { critical:'CRITICAL', high:'HIGH', moderate:'MODERATE', low:'LOW' };
 
 function ReportModal({ patient, onClose }) {
+  const triage = patient.triageData;
+  const logistics = patient.logisticsData;
+  const hospitalName =
+    logistics?.nearest_hospital ||
+    (patient.assignedHospId === 'RH01' ? 'District General Hospital Ratnagiri' :
+     patient.assignedHospId === 'RH02' ? 'Civil Hospital Ratnagiri' :
+     'Tilak Ayurvedic Hospital');
+
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-card" style={{ maxWidth: 500 }}>
@@ -67,9 +75,26 @@ function ReportModal({ patient, onClose }) {
             </>
           )}
 
-          {/* Assigned hospital */}
+          {/* Triage result (if from backend) */}
+          {triage && (
+            <>
+              <div style={{ fontSize:12, fontWeight:700, textTransform:'uppercase', color:'#6b7280', marginBottom:6 }}>AI Triage Result</div>
+              <div style={{ background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:8, padding:'10px 12px', marginBottom:14, fontSize:13, lineHeight:1.5 }}>
+                <strong>Severity:</strong> {triage.severity} ({triage.priority})<br />
+                <strong>Risk Score:</strong> {triage.risk_score}<br />
+                <strong>Recommendation:</strong> {triage.recommendation}<br />
+                {triage.reasoning && (
+                  <ul style={{ paddingLeft:16, marginTop:6 }}>
+                    {triage.reasoning.map((r,i) => <li key={i}>{r}</li>)}
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Assigned hospital – now dynamic */}
           <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:10, padding:'10px 14px', fontSize:13 }}>
-            🏥 <strong>Assigned Hospital:</strong> {patient.assignedHospId === 'RH01' ? 'District General Hospital Ratnagiri' : patient.assignedHospId === 'RH02' ? 'Civil Hospital Ratnagiri' : 'Tilak Ayurvedic Hospital'}
+            🏥 <strong>Assigned Hospital:</strong> {hospitalName}
           </div>
 
           <div className="modal-actions" style={{ marginTop:16 }}>
@@ -132,7 +157,7 @@ export default function QueueTable() {
                         borderRadius:6, cursor:'pointer', transition:'all 0.15s',
                         color:'#374151'
                       }}
-                      onMouseEnter={e => e.target.style.background='#2563eb' && (e.target.style.color='#fff')}
+                      onMouseEnter={e => { e.target.style.background='#2563eb'; e.target.style.color='#fff'; }}
                       onMouseLeave={e => { e.target.style.background='#f3f4f6'; e.target.style.color='#374151'; }}
                     >
                       View Report

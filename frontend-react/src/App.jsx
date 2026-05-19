@@ -1,7 +1,8 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, NavLink, Link, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { EmergencyStoreProvider } from './context/EmergencyStore';
+import { EmergencyStoreProvider, useEmergencyStore } from './context/EmergencyStore';
+import useWebSocket from './hooks/useWebSocket';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login          from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
@@ -56,16 +57,19 @@ function Sidebar() {
 
 function TopBar() {
   const { user } = useAuth();
+  const { backendOnline } = useEmergencyStore();
   return (
     <header className="top-bar">
       <div className="top-bar-left">
         <div className="live-badge"><span className="live-dot"></span>LIVE SYSTEM ACTIVE</div>
+        <div className={`backend-badge ${backendOnline ? 'online' : 'offline'}`}>
+          <span className={`backend-dot ${backendOnline ? 'online' : 'offline'}`}></span>
+          {backendOnline ? 'Backend: Online' : 'Backend: Offline (local mode)'}
+        </div>
       </div>
       <div className="top-bar-right">
         {user?.role === 'admin' && (
-          <>
-            <span className="load-label">Emergency Command Center</span>
-          </>
+          <span className="load-label">Emergency Command Center</span>
         )}
         <Link to="/intake" className="btn-new-intake">+ New Intake</Link>
       </div>
@@ -87,6 +91,8 @@ function ComingSoon({ title }) {
 }
 
 function AppLayout() {
+  const { handleWsAlert } = useEmergencyStore();
+  useWebSocket(handleWsAlert);
   return (
     <div className="app-layout">
       <Sidebar />

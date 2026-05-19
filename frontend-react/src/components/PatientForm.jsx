@@ -10,25 +10,7 @@ const STEP_TEXTS = [
   'Generating action plan...',
 ];
 
-function deriveFormSeverity(form) {
-  let score = 0;
-  const o2  = parseFloat(form.o2);
-  const hr  = parseFloat(form.hr);
-  const age = parseInt(form.age);
-  if (!isNaN(o2) && o2 < 88)  score += 3;
-  else if (!isNaN(o2) && o2 < 94) score += 1;
-  if (!isNaN(hr) && (hr > 120 || hr < 40)) score += 2;
-  if (!isNaN(age) && age >= 60) score += 1;
-  const symp = (form.symptoms || '').toLowerCase();
-  if (symp.includes('chest pain') || symp.includes('cardiac')) score += 3;
-  if (symp.includes('breath') || symp.includes('respiratory')) score += 2;
-  if (symp.includes('unconsci') || symp.includes('faint'))     score += 3;
-  if (form.incidentType === 'Cardiac Event')    score += 3;
-  if (form.incidentType === 'Traffic Accident') score += 1;
-  return score >= 6 ? 'critical' : score >= 3 ? 'high' : score >= 1 ? 'moderate' : 'low';
-}
-
-export default function PatientForm({ onAnalysisComplete }) {
+export default function PatientForm({ onTriageComplete }) {
   const { addPatient } = useEmergencyStore();
   const [form, setForm] = useState({
     name:'', age:'', gender:'', contact:'',
@@ -50,7 +32,6 @@ export default function PatientForm({ onAnalysisComplete }) {
     e.preventDefault();
     setBtnState('loading');
     setSteps(STEP_TEXTS.map(() => 'pending'));
-    if (onAnalysisComplete) onAnalysisComplete(null);
 
     let i = 0;
     const next = () => {
@@ -58,14 +39,16 @@ export default function PatientForm({ onAnalysisComplete }) {
         idx < i ? 'done' : idx === i ? 'active' : 'pending'
       ));
       i++;
-      if (i <= STEP_TEXTS.length) { setTimeout(next, 900); }
-      else {
+      if (i <= STEP_TEXTS.length) {
+        setTimeout(next, 900);
+      } else {
         setSteps(STEP_TEXTS.map(() => 'done'));
         setBtnState('done');
-        const severity = deriveFormSeverity(form);
-        // Save to global store (admin dashboard reads this)
-        addPatient({ ...form, uploads }, severity);
-        if (onAnalysisComplete) onAnalysisComplete({ form: { ...form, uploads }, uploads });
+        // Submit to backend and get final patient data
+        const formData = { ...form, uploads };
+        addPatient(formData).then(patient => {
+          if (onTriageComplete) onTriageComplete(patient);
+        });
         setTimeout(() => setBtnState('idle'), 3000);
       }
     };
@@ -78,11 +61,14 @@ export default function PatientForm({ onAnalysisComplete }) {
   };
 
   return (
+    // ... (JSX unchanged, only the button onClick and prop changes)
+    // Note: the form JSX is identical, just ensure onSubmit={handleSubmit}
+    // and remove references to onAnalysisComplete
     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
       {modal && (
         <UploadModal
           type={modal}
-          severity={deriveFormSeverity(form)}
+          severity="moderate"  // severity will be determined later
           onClose={() => setModal(null)}
           onComplete={result => { handleUploadDone(result); setModal(null); }}
         />
@@ -91,6 +77,7 @@ export default function PatientForm({ onAnalysisComplete }) {
       <div className="panel" style={{ flex:1 }}>
         <h2>Emergency Intake Form</h2>
         <form onSubmit={handleSubmit}>
+          {/* same form fields as before */}
           <div className="two-col">
             <div className="form-group"><label>Patient Name</label><input placeholder="Full name" value={form.name} onChange={set('name')} /></div>
             <div className="form-group"><label>Age</label><input type="number" placeholder="Age" value={form.age} onChange={set('age')} min="0" max="120" /></div>
@@ -154,6 +141,7 @@ export default function PatientForm({ onAnalysisComplete }) {
         </form>
       </div>
 
+      {/* Processing steps panel – unchanged */}
       <div className="panel">
         <h4 style={{ fontSize:13, fontWeight:700, marginBottom:12, color:'#374151' }}>AI Processing Pipeline</h4>
         <ul className="step-list">
