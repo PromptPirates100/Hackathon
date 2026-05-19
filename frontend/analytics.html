@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseGrid AI — Analytics</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">♥</span><span class="logo-text">PulseGrid AI</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="live-queue.html">Live Queue</a></li>
+            <li><a href="critical-alerts.html">Critical Alerts</a></li>
+            <li><a href="hospitals.html">Hospitals</a></li>
+            <li><a href="analytics.html" class="active">Analytics</a></li>
+            <li><a href="emergency-intake.html">Emergency Intake</a></li>
+            <li><a href="system-logs.html">System Logs</a></li>
+            <li><a href="ai-insights.html">AI Insights</a></li>
+        </ul>
+    </nav>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <div class="top-bar-left"><div class="live-badge"><span class="live-dot"></span>LIVE SYSTEM ACTIVE</div></div>
+            <div class="top-bar-right"><a href="emergency-intake.html" class="new-intake-btn">+ New Intake</a></div>
+        </header>
+        <div class="page-content">
+            <div class="page-title-row">
+                <h1 class="page-title">Analytics</h1>
+                <span class="live-count">Last 24 hours</span>
+            </div>
+            <div class="analytics-full-grid">
+                <div class="panel chart-panel-large">
+                    <h2>Emergency Trends (Last 24h)</h2>
+                    <canvas id="trendsLarge" height="100"></canvas>
+                </div>
+                <div class="panel chart-panel-half">
+                    <h2>Severity Distribution</h2>
+                    <canvas id="severityLarge" height="200"></canvas>
+                    <div class="chart-legend">
+                        <span class="legend-dot red"></span>Critical (Red)
+                        <span class="legend-dot orange"></span>High (Orange)
+                        <span class="legend-dot yellow"></span>Moderate (Yellow)
+                        <span class="legend-dot blue"></span>Low (Blue)
+                    </div>
+                </div>
+                <div class="panel chart-panel-half">
+                    <h2>Hospital Utilization</h2>
+                    <canvas id="utilizationLarge" height="200"></canvas>
+                </div>
+                <div class="panel chart-panel-half">
+                    <h2>Response Time (min) by Shift</h2>
+                    <canvas id="responseChart" height="200"></canvas>
+                </div>
+                <div class="panel chart-panel-half">
+                    <h2>Cases by Incident Type</h2>
+                    <canvas id="incidentChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="analytics.js"></script>
+</body>
+</html>

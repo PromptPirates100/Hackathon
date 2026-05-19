@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseGrid AI — Admin Dashboard</title>
+    <meta name="description" content="PulseGrid AI real-time emergency triage and coordination admin dashboard.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span class="logo-icon">♥</span>
+            <span class="logo-text">PulseGrid AI</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active" id="nav-dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+            </a></li>
+            <li><a href="live-queue.html" id="nav-queue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Live Queue
+            </a></li>
+            <li><a href="critical-alerts.html" id="nav-alerts">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Critical Alerts
+            </a></li>
+            <li><a href="hospitals.html" id="nav-hospitals">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Hospitals
+            </a></li>
+            <li><a href="analytics.html" id="nav-analytics">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Analytics
+            </a></li>
+            <li><a href="emergency-intake.html" id="nav-intake">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                Emergency Intake
+            </a></li>
+            <li><a href="system-logs.html" id="nav-logs">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                System Logs
+            </a></li>
+            <li><a href="ai-insights.html" id="nav-ai">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                AI Insights
+            </a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+
+        <!-- TOP HEADER BAR -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <div class="live-badge">
+                    <span class="live-dot"></span>
+                    LIVE SYSTEM ACTIVE
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <span class="emergency-load-label">Emergency Load: <strong class="load-high">HIGH</strong></span>
+                <div class="load-bar-container">
+                    <div class="load-bar-fill high"></div>
+                </div>
+                <a href="emergency-intake.html" class="new-intake-btn">+ New Intake</a>
+            </div>
+        </header>
+
+        <!-- METRIC CARDS -->
+        <div class="metrics-row">
+            <div class="metric-card">
+                <div class="metric-label">Active Emergencies</div>
+                <div class="metric-num" id="m-active">52</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">High Risk Cases</div>
+                <div class="metric-num red" id="m-high">18</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Critical Alerts</div>
+                <div class="metric-num red" id="m-critical">3</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Avg Response Time</div>
+                <div class="metric-num" id="m-resp">11 min</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Hospital Load %</div>
+                <div class="metric-num orange" id="m-load">76%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Available Beds</div>
+                <div class="metric-num green" id="m-beds">24</div>
+            </div>
+        </div>
+
+        <!-- MAIN GRID -->
+        <div class="admin-grid">
+
+            <!-- LEFT: TRIAGE QUEUE + ALERT CENTER + ANALYTICS -->
+            <div class="admin-col-left">
+
+                <!-- LIVE TRIAGE QUEUE -->
+                <div class="panel" id="triage-queue-panel">
+                    <div class="panel-header">
+                        <h2>CORE COMPONENT: live, color-coded and auto-sorting <span>Live Triage Queue</span></h2>
+                    </div>
+                    <div class="queue-table-wrap">
+                        <table class="queue-table" id="triageTable">
+                            <tbody id="triageBody">
+                                <tr class="q-row critical">
+                                    <td><span class="q-dot red"></span> Multi-trauma accident</td>
+                                    <td>ID: 001</td><td>14:02</td><td>Team A</td>
+                                </tr>
+                                <tr class="q-row high">
+                                    <td><span class="q-dot orange"></span> Cardiac emergency</td>
+                                    <td>ID: 002</td><td>14:05</td><td>Team B</td>
+                                </tr>
+                                <tr class="q-row moderate">
+                                    <td><span class="q-dot yellow"></span> Head injury</td>
+                                    <td>ID: 003</td><td>14:12</td><td>—</td>
+                                </tr>
+                                <tr class="q-row low">
+                                    <td><span class="q-dot yellow"></span> Fever case</td>
+                                    <td>ID: 004</td><td>14:18</td><td>—</td>
+                                </tr>
+                                <tr class="q-row low">
+                                    <td><span class="q-dot green"></span> Minor Laceration</td>
+                                    <td>ID: 005</td><td>14:22</td><td>—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CRITICAL ALERT CENTER -->
+                <div class="panel alert-center-panel">
+                    <div class="panel-header">
+                        <h2>Critical Alert Center</h2>
+                        <span class="panel-menu">⋮</span>
+                    </div>
+                    <div class="alert-tags">
+                        <span class="alert-tag red">⚠ Multi-trauma escalation</span>
+                        <span class="alert-tag red">⚠ ICU capacity critical</span>
+                        <span class="alert-tag orange">⚠ High-risk patient detected</span>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS SECTION -->
+                <div class="panel analytics-panel">
+                    <h2>Analytics Section</h2>
+                    <div class="analytics-grid">
+                        <div class="chart-block">
+                            <h4>Severity distribution</h4>
+                            <canvas id="severityChart" height="160"></canvas>
+                        </div>
+                        <div class="chart-block">
+                            <h4>Emergency trends</h4>
+                            <canvas id="trendsChart" height="160"></canvas>
+                        </div>
+                        <div class="chart-block">
+                            <h4>Hospital utilization</h4>
+                            <canvas id="utilizationChart" height="160"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: HOSPITAL STATUS + AI INSIGHTS -->
+            <div class="admin-col-right">
+
+                <!-- HOSPITAL STATUS PANEL -->
+                <div class="panel hospital-status-panel">
+                    <h2>Hospital Status Panel</h2>
+                    <div class="hospital-list">
+                        <div class="hospital-row high-load">
+                            <span class="hosp-color-bar red"></span>
+                            <div class="hosp-info">
+                                <strong>City Trauma Center</strong>
+                                <span class="hosp-tag red">HIGH LOAD</span>
+                            </div>
+                            <div class="hosp-sparkline">
+                                <canvas id="spark1" width="80" height="30"></canvas>
+                            </div>
+                        </div>
+                        <div class="hospital-row moderate-load">
+                            <span class="hosp-color-bar orange"></span>
+                            <div class="hosp-info">
+                                <strong>Metro Hospital</strong>
+                                <span class="hosp-tag orange">MODERATE</span>
+                            </div>
+                            <div class="hosp-sparkline">
+                                <canvas id="spark2" width="80" height="30"></canvas>
+                            </div>
+                        </div>
+                        <div class="hospital-row full-load">
+                            <span class="hosp-color-bar dark-red"></span>
+                            <div class="hosp-info">
+                                <strong>Emergency Unit A</strong>
+                                <span class="hosp-tag dark-red">FULL</span>
+                            </div>
+                            <div class="hosp-sparkline">
+                                <canvas id="spark3" width="80" height="30"></canvas>
+                            </div>
+                        </div>
+                        <div class="hospital-row normal-load">
+                            <span class="hosp-color-bar green"></span>
+                            <div class="hosp-info">
+                                <strong>St. Mary's Medical</strong>
+                                <span class="hosp-tag green">AVAILABLE</span>
+                            </div>
+                            <div class="hosp-sparkline">
+                                <canvas id="spark4" width="80" height="30"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI OPERATIONAL INSIGHTS -->
+                <div class="panel ai-insights-panel">
+                    <h2>AI Operational Insights</h2>
+                    <ul class="ai-insights-list">
+                        <li>Emergency load increased by 32% <span class="ai-tag">(AI analysis)</span></li>
+                        <li>Cardiac emergencies trending upward <span class="ai-tag">(AI analysis)</span></li>
+                        <li>Respiratory instability spike detected <span class="ai-tag">(AI analysis)</span></li>
+                        <li>ICU capacity nearing critical threshold <span class="ai-tag">(AI analysis)</span></li>
+                        <li>Recommended: Pre-position 2 ALS units south <span class="ai-tag">(AI suggestion)</span></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

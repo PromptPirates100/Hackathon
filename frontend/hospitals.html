@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseGrid AI — Hospital Grid</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+    <nav class="sidebar">
+        <div class="sidebar-logo"><span class="logo-icon">♥</span><span class="logo-text">PulseGrid AI</span></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="live-queue.html">Live Queue</a></li>
+            <li><a href="critical-alerts.html">Critical Alerts</a></li>
+            <li><a href="hospitals.html" class="active">Hospitals</a></li>
+            <li><a href="analytics.html">Analytics</a></li>
+            <li><a href="emergency-intake.html">Emergency Intake</a></li>
+            <li><a href="system-logs.html">System Logs</a></li>
+            <li><a href="ai-insights.html">AI Insights</a></li>
+        </ul>
+    </nav>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <div class="top-bar-left"><div class="live-badge"><span class="live-dot"></span>LIVE SYSTEM ACTIVE</div></div>
+            <div class="top-bar-right"><a href="emergency-intake.html" class="new-intake-btn">+ New Intake</a></div>
+        </header>
+        <div class="page-content">
+            <div class="page-title-row">
+                <h1 class="page-title">Hospital Grid</h1>
+                <span class="live-count">6 Hospitals Monitored</span>
+            </div>
+            <div class="hospital-cards-grid">
+                <div class="hospital-card full">
+                    <div class="hcard-header"><h3>Emergency Unit A</h3><span class="alert-badge dark-red">FULL</span></div>
+                    <div class="hcard-stats">
+                        <div class="hcard-stat"><span>ICU Beds</span><strong>0 / 12</strong></div>
+                        <div class="hcard-stat"><span>General</span><strong>3 / 40</strong></div>
+                        <div class="hcard-stat"><span>ETA</span><strong>6 min</strong></div>
+                        <div class="hcard-stat"><span>Load</span><strong class="red">100%</strong></div>
+                    </div>
+                    <div class="capacity-bar"><div class="capacity-fill full-fill" style="width:100%"></div></div>
+                    <div class="hcard-footer">Diverting all new critical cases</div>
+                </div>
+                <div class="hospital-card high">
+                    <div class="hcard-header"><h3>City Trauma Center</h3><span class="alert-badge red">HIGH LOAD</span></div>
+                    <div class="hcard-stats">
+                        <div class="hcard-stat"><span>ICU Beds</span><strong>2 / 10</strong></div>
+                        <div class="hcard-stat"><span>General</span><strong>8 / 50</strong></div>
+                        <div class="hcard-stat"><span>ETA</span><strong>10 min</strong></div>
+                        <div class="hcard-stat"><span>Load</span><strong class="red">88%</strong></div>
+                    </div>
+                    <div class="capacity-bar"><div class="capacity-fill high-fill" style="width:88%"></div></div>
+                    <div class="hcard-footer">Trauma team on standby</div>
+                </div>
+                <div class="hospital-card moderate">
+                    <div class="hcard-header"><h3>Metro Hospital</h3><span class="alert-badge orange">MODERATE</span></div>
+                    <div class="hcard-stats">
+                        <div class="hcard-stat"><span>ICU Beds</span><strong>5 / 8</strong></div>
+                        <div class="hcard-stat"><span>General</span><strong>22 / 60</strong></div>
+                        <div class="hcard-stat"><span>ETA</span><strong>14 min</strong></div>
+                        <div class="hcard-stat"><span>Load</span><strong class="orange">62%</strong></div>
+                    </div>
+                    <div class="capacity-bar"><div class="capacity-fill moderate-fill" style="width:62%"></div></div>
+                    <div class="hcard-footer">Accepting moderate cases</div>
+                </div>
+                <div class="hospital-card available">
+                    <div class="hcard-header"><h3>St. Mary's Medical</h3><span class="alert-badge green">AVAILABLE</span></div>
+                    <div class="hcard-stats">
+                        <div class="hcard-stat"><span>ICU Beds</span><strong>10 / 14</strong></div>
+                        <div class="hcard-stat"><span>General</span><strong>35 / 70</strong></div>
+                        <div class="hcard-stat"><span>ETA</span><strong>18 min</strong></div>
+                        <div class="hcard-stat"><span>Load</span><strong class="green">35%</strong></div>
+                    </div>
+                    <div class="capacity-bar"><div class="capacity-fill available-fill" style="width:35%"></div></div>
+                    <div class="hcard-footer">All teams available</div>
+                </div>
+                <div class="hospital-card available">
+                    <div class="hcard-header"><h3>North General Hospital</h3><span class="alert-badge green">AVAILABLE</span></div>
+                    <div class="hcard-stats">
+                        <div class="hcard-stat"><span>ICU Beds</span><strong>8 / 10</strong></div>
+                        <div class="hcard-stat"><span>General</span><strong>28 / 55</strong></div>
+                        <div class="hcard-stat"><span>ETA</span><strong>22 min</strong></div>
+                        <div class="hcard-stat"><span>Load</span><strong class="green">40%</strong></div>
+                    </div>
+                    <div class="capacity-bar"><div class="capacity-fill available-fill" style="width:40%"></div></div>
+                    <div class="hcard-footer">Pediatric unit available</div>
+                </div>
+                <div class="hospital-card moderate">
+                    <div class="hcard-header"><h3>Riverside Clinic</h3><span class="alert-badge orange">MODERATE</span></div>
+                    <div class="hcard-stats">
+                        <div class="hcard-stat"><span>ICU Beds</span><strong>1 / 4</strong></div>
+                        <div class="hcard-stat"><span>General</span><strong>10 / 30</strong></div>
+                        <div class="hcard-stat"><span>ETA</span><strong>9 min</strong></div>
+                        <div class="hcard-stat"><span>Load</span><strong class="orange">70%</strong></div>
+                    </div>
+                    <div class="capacity-bar"><div class="capacity-fill moderate-fill" style="width:70%"></div></div>
+                    <div class="hcard-footer">Minor emergencies only</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
